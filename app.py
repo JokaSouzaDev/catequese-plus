@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date
@@ -17,8 +18,9 @@ elif database_url and database_url.startswith('postgresql://'):
 # No Vercel, SQLite serve apenas como fallback de demonstração e não é persistente.
 # Em produção, configure DATABASE_URL apontando para PostgreSQL.
 if not database_url:
-    sqlite_path = '/tmp/catequese.db' if os.environ.get('VERCEL') else 'catequese.db'
-    database_url = f'sqlite:///{sqlite_path}'
+    if os.environ.get('VERCEL'):
+        raise RuntimeError('DATABASE_URL is required in Vercel production.')
+    database_url = 'sqlite:///catequese.db'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -83,6 +85,17 @@ def owned_room(room_id):
     if not room or room.user_id != current_user.id:
         abort(404)
     return room
+
+@app.route('/api/health')
+def health():
+    try:
+        db.session.execute(text('SELECT 1'))
+        return jsonify({
+            'status': 'ok',
+            'database': 'postgresql' if database_url.startswith('postgresql') else 'sqlite'
+        }), 200
+    except Exception as exc:
+        return jsonify({'status': 'error', 'database': 'unavailable'}), 503
 
 @app.route('/')
 def index():
