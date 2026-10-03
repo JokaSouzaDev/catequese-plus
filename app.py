@@ -18,9 +18,8 @@ elif database_url and database_url.startswith('postgresql://'):
 # No Vercel, SQLite serve apenas como fallback de demonstração e não é persistente.
 # Em produção, configure DATABASE_URL apontando para PostgreSQL.
 if not database_url:
-    if os.environ.get('VERCEL'):
-        raise RuntimeError('DATABASE_URL is required in Vercel production.')
-    database_url = 'sqlite:///catequese.db'
+    sqlite_path = '/tmp/catequese-bootstrap.db' if os.environ.get('VERCEL') else 'catequese.db'
+    database_url = f'sqlite:///{sqlite_path}'
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or hashlib.sha256(
     (database_url + '|catequese-plus-session-key').encode('utf-8')
