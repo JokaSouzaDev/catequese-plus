@@ -5,9 +5,9 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date
 import os
+import hashlib
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'troque-esta-chave-em-producao')
 
 database_url = os.environ.get('DATABASE_URL')
 if database_url and database_url.startswith('postgres://'):
@@ -22,6 +22,9 @@ if not database_url:
         raise RuntimeError('DATABASE_URL is required in Vercel production.')
     database_url = 'sqlite:///catequese.db'
 
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or hashlib.sha256(
+    (database_url + '|catequese-plus-session-key').encode('utf-8')
+).hexdigest()
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
