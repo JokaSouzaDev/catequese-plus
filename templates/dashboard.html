@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-head"><div><span class="eyebrow">Olá, {{ current_user.name }}</span><h1>Suas salas</h1></div></div>
+<section class="grid two"><div class="panel"><h2>Criar nova sala</h2><form method="post"><label>Nome da sala<input name="name" placeholder="Ex.: Crisma 2026" required></label><label>Descrição<input name="description" placeholder="Ex.: Sábados às 15h"></label><button class="btn" type="submit">Criar sala</button></form></div><div class="panel"><h2>Visão geral</h2><p class="big-number">{{ rooms|length }}</p><p class="muted">salas cadastradas</p></div></section>
+<section class="cards">{% for room in rooms %}<a class="room-card" href="{{ url_for('room_detail', room_id=room.id) }}"><div><span class="room-icon">✦</span><h3>{{ room.name }}</h3><p>{{ room.description or 'Sem descrição' }}</p></div><small>{{ room.students|length }} aluno(s)</small></a>{% else %}<div class="empty">Você ainda não criou nenhuma sala.</div>{% endfor %}</section>
+{% endblock %}
