@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero">
+  <div><span class="eyebrow">Gestão simples para catequistas</span><h1>Organize sua catequese sem papelada.</h1><p>Crie turmas, cadastre alunos, registre chamadas e acompanhe faltas e justificativas em um só lugar.</p><div class="actions"><a class="btn" href="{{ url_for('register') }}">Criar conta</a><a class="btn secondary" href="{{ url_for('login') }}">Entrar</a></div></div>
+  <div class="hero-card"><h3>Chamada rápida</h3><div class="mini-row"><span>Maria</span><b class="ok">Presente</b></div><div class="mini-row"><span>João</span><b class="miss">Falta</b></div><div class="mini-row"><span>Ana</span><b class="just">Justificada</b></div></div>
+</section>
+{% endblock %}
