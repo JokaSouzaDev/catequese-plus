@@ -26,8 +26,16 @@ if not database_url:
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or hashlib.sha256(
     (database_url + '|catequese-plus-session-key').encode('utf-8')
 ).hexdigest()
+IS_VERCEL = bool(os.environ.get('VERCEL'))
+IS_POSTGRES = database_url.startswith('postgresql')
+PERSISTENT_DATABASE_READY = IS_POSTGRES or not IS_VERCEL
+
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+} if IS_POSTGRES else {}
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = bool(os.environ.get('VERCEL'))
@@ -173,12 +181,25 @@ def privacy():
 def health():
     try:
         db.session.execute(text('SELECT 1'))
+        if IS_VERCEL and not IS_POSTGRES:
+            return jsonify({
+                'status': 'error',
+                'database': 'sqlite-temporary',
+                'persistent': False,
+                'message': 'DATABASE_URL PostgreSQL não está configurada no Vercel.'
+            }), 503
         return jsonify({
             'status': 'ok',
-            'database': 'postgresql' if database_url.startswith('postgresql') else 'sqlite'
+            'database': 'postgresql' if IS_POSTGRES else 'sqlite-local',
+            'persistent': True
         }), 200
-    except Exception as exc:
-        return jsonify({'status': 'error', 'database': 'unavailable'}), 503
+    except Exception:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'database': 'unavailable',
+            'persistent': False
+        }), 503
 
 @app.route('/')
 def index():
@@ -190,6 +211,12 @@ def index():
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
+    if IS_VERCEL and not IS_POSTGRES:
+        return render_template(
+            'database_error.html',
+            title='Cadastro temporariamente indisponível',
+            message='O banco PostgreSQL persistente ainda não está conectado. Nenhuma solicitação será aceita até a conexão ser restaurada.'
+        ), 503
     if request.method == 'POST':
         name = request.form['name'].strip()
         email = request.form['email'].strip().lower()
@@ -267,6 +294,12 @@ def admin_login():
 @app.route('/admin')
 @admin_required
 def admin_panel():
+    if IS_VERCEL and not IS_POSTGRES:
+        return render_template(
+            'database_error.html',
+            title='Banco persistente desconectado',
+            message='O painel ADM não pode listar solicitações com segurança enquanto DATABASE_URL não apontar para PostgreSQL.'
+        ), 503
     requests = AccessControl.query.join(User).order_by(
         case(
             (AccessControl.status == 'pending', 0),
