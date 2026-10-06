@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Aguardando aprovação • Catequese+{% endblock %}
+{% block content %}
+<section class="auth-card pending-card">
+  <div class="pending-icon">⌛</div>
+  <span class="eyebrow">Solicitação enviada</span>
+  <h1>Aguardando aprovação</h1>
+  <p>Seu cadastro foi recebido. O administrador precisa liberar seu acesso antes do primeiro login.</p>
+  <div class="pending-email">{{ email }}</div>
+  <a class="btn secondary wide" href="{{ url_for('login') }}">Ir para o login</a>
+</section>
+{% endblock %}
