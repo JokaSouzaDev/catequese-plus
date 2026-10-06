@@ -165,6 +165,10 @@ def owned_room(room_id):
         abort(404)
     return room
 
+@app.route('/privacidade')
+def privacy():
+    return render_template('privacy.html')
+
 @app.route('/api/health')
 def health():
     try:
