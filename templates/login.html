@@ -1,3 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Entrar • Catequese+{% endblock %}
-{% block content %}<section class="auth-card"><h1>Entrar</h1><p>Acesse suas salas de catequese.</p><form method="post"><label>E-mail<input name="email" type="email" required></label><label>Senha<input name="password" type="password" required></label><button class="btn" type="submit">Entrar</button></form><p class="muted">Ainda não tem conta? <a href="{{ url_for('register') }}">Cadastre-se</a></p></section>{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <h1>Entrar</h1>
+  <p>Acesse suas salas de catequese depois que seu cadastro estiver aprovado.</p>
+  <form method="post">
+    <label>E-mail<input name="email" type="email" required></label>
+    <label>Senha<input name="password" type="password" required></label>
+    <button class="btn" type="submit">Entrar</button>
+  </form>
+  <p class="muted">Ainda não tem acesso? <a href="{{ url_for('register') }}">Solicitar cadastro</a></p>
+  <p class="admin-entry"><a href="{{ url_for('admin_login') }}">Área administrativa</a></p>
+</section>
+{% endblock %}
