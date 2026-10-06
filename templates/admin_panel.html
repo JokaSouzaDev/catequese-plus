@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Painel ADM • Catequese+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <span class="eyebrow">Controle de acesso</span>
+    <h1>Painel ADM</h1>
+    <p class="muted">Analise os dados autorizados pelo solicitante antes de permitir ou negar o acesso.</p>
+  </div>
+  <a class="btn secondary" href="{{ url_for('admin_logout') }}">Sair do ADM</a>
+</div>
+
+<div class="admin-summary">
+  <div class="summary-box">
+    <strong>{{ requests|selectattr('status', 'equalto', 'pending')|list|length }}</strong>
+    <span>Pendentes</span>
+  </div>
+  <div class="summary-box">
+    <strong>{{ requests|selectattr('status', 'equalto', 'approved')|list|length }}</strong>
+    <span>Permitidos</span>
+  </div>
+  <div class="summary-box">
+    <strong>{{ requests|selectattr('status', 'equalto', 'denied')|list|length }}</strong>
+    <span>Negados</span>
+  </div>
+</div>
+
+<section class="admin-list">
+{% for item in requests %}
+  <article class="access-card">
+    <div class="access-head">
+      <div>
+        <div class="access-name">{{ item.user.name }}</div>
+        <div class="muted">{{ item.user.email }}</div>
+      </div>
+      <span class="status-pill status-{{ item.status }}">
+        {% if item.status == 'pending' %}Pendente{% elif item.status == 'approved' %}Permitido{% else %}Negado{% endif %}
+      </span>
+    </div>
+
+    <div class="metadata-grid">
+      <div><small>IP</small><strong>{{ item.signup_ip or 'Não registrado' }}</strong></div>
+      <div><small>Localização por IP</small><strong>
+        {% if item.ip_city or item.ip_region or item.ip_country %}
+          {{ item.ip_city or '?' }}{% if item.ip_region %}, {{ item.ip_region }}{% endif %}{% if item.ip_country %} • {{ item.ip_country }}{% endif %}
+        {% else %}Não disponível{% endif %}
+      </strong></div>
+      <div><small>CEP aproximado</small><strong>{{ item.ip_postal_code or 'Não disponível' }}</strong></div>
+      <div><small>Coordenadas autorizadas</small><strong>
+        {% if item.browser_lat and item.browser_lon %}
+          {{ item.browser_lat }}, {{ item.browser_lon }}
+          {% if item.browser_accuracy %} (±{{ item.browser_accuracy }} m){% endif %}
+        {% else %}Não fornecidas{% endif %}
+      </strong></div>
+      <div class="metadata-wide"><small>Navegador / User-Agent</small><strong class="break-text">{{ item.user_agent or 'Não registrado' }}</strong></div>
+      <div class="metadata-wide"><small>Informações do dispositivo</small><strong class="break-text">{{ item.device_info or 'Não registradas' }}</strong></div>
+      <div><small>Consentimento</small><strong>{{ 'Aceito' if item.consent_tracking else 'Cadastro anterior / não registrado' }}</strong></div>
+      <div><small>Solicitado em</small><strong>{{ item.requested_at.strftime('%d/%m/%Y %H:%M') }}</strong></div>
+    </div>
+
+    <div class="access-actions">
+      <form method="post" action="{{ url_for('approve_access', control_id=item.id) }}">
+        <button class="btn approve-btn" type="submit">Permitir acesso</button>
+      </form>
+      <form method="post" action="{{ url_for('deny_access', control_id=item.id) }}">
+        <button class="btn deny-btn" type="submit">Negar acesso</button>
+      </form>
+    </div>
+  </article>
+{% else %}
+  <div class="empty">Nenhum cadastro encontrado.</div>
+{% endfor %}
+</section>
+{% endblock %}
