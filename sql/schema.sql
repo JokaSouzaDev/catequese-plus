@@ -48,3 +48,26 @@ CREATE INDEX IF NOT EXISTS idx_note_room_id ON note(room_id);
 CREATE INDEX IF NOT EXISTS idx_attendance_day_room_id ON attendance_day(room_id);
 CREATE INDEX IF NOT EXISTS idx_attendance_record_day_id ON attendance_record(attendance_day_id);
 CREATE INDEX IF NOT EXISTS idx_attendance_record_student_id ON attendance_record(student_id);
+
+
+CREATE TABLE IF NOT EXISTS access_control (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER UNIQUE NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending',
+  consent_tracking BOOLEAN NOT NULL DEFAULT FALSE,
+  signup_ip VARCHAR(64) DEFAULT '',
+  ip_city VARCHAR(120) DEFAULT '',
+  ip_region VARCHAR(120) DEFAULT '',
+  ip_country VARCHAR(20) DEFAULT '',
+  ip_postal_code VARCHAR(32) DEFAULT '',
+  browser_lat VARCHAR(40) DEFAULT '',
+  browser_lon VARCHAR(40) DEFAULT '',
+  browser_accuracy VARCHAR(40) DEFAULT '',
+  user_agent TEXT DEFAULT '',
+  device_info TEXT DEFAULT '',
+  requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  reviewed_at TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_access_control_status ON access_control(status);
+CREATE INDEX IF NOT EXISTS idx_access_control_requested_at ON access_control(requested_at);
