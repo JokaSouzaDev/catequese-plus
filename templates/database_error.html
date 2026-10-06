@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} • Catequese+{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <span class="eyebrow">Banco de dados</span>
+  <h1>{{ title }}</h1>
+  <p>{{ message }}</p>
+  <div class="flash error">
+    O Catequese+ bloqueou esta operação para evitar perda de cadastros, salas ou chamadas.
+  </div>
+  <p class="muted">Assim que o PostgreSQL estiver conectado ao projeto, o sistema volta a funcionar normalmente.</p>
+  <a class="btn secondary wide" href="{{ url_for('index') }}">Voltar ao início</a>
+</section>
+{% endblock %}
