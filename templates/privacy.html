@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Privacidade • Catequese+{% endblock %}
+{% block content %}
+<section class="panel privacy-page">
+  <span class="eyebrow">Privacidade e acesso</span>
+  <h1>Informações coletadas no pedido de acesso</h1>
+  <p>O Catequese+ registra dados técnicos somente quando a pessoa envia uma solicitação de cadastro e aceita o aviso apresentado no formulário.</p>
+
+  <h2>O que pode ser registrado</h2>
+  <p>Endereço IP, navegador e informações técnicas do dispositivo, cidade/região/país aproximados derivados do IP e, somente quando o navegador autorizar, coordenadas de geolocalização e precisão aproximada.</p>
+
+  <h2>Para que usamos</h2>
+  <p>Esses dados são exibidos ao administrador exclusivamente para analisar, permitir, negar ou revogar o acesso ao sistema.</p>
+
+  <h2>Localização</h2>
+  <p>A localização derivada do IP é aproximada. A localização fornecida pelo navegador exige uma permissão separada do próprio navegador e pode ser recusada sem impedir o envio da solicitação.</p>
+
+  <h2>Controle dos dados</h2>
+  <p>O administrador responsável deve manter apenas as informações necessárias para o controle de acesso e atender solicitações de correção ou exclusão quando aplicável.</p>
+
+  <a class="btn secondary" href="{{ url_for('register') }}">Voltar ao cadastro</a>
+</section>
+{% endblock %}
