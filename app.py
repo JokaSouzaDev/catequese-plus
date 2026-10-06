@@ -11,7 +11,13 @@ import hashlib
 
 app = Flask(__name__)
 
-database_url = os.environ.get('DATABASE_URL')
+database_url = (
+    os.environ.get('DATABASE_URL')
+    or os.environ.get('POSTGRES_URL')
+    or os.environ.get('DATABASE_URL_POSTGRES_URL')
+    or os.environ.get('DATABASE_URL_POSTGRES_PRISMA_URL')
+    or os.environ.get('DATABASE_URL_POSTGRES_URL_NON_POOLING')
+)
 if database_url and database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql+psycopg://', 1)
 elif database_url and database_url.startswith('postgresql://'):
