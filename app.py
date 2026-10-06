@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, abort, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
+from sqlalchemy import text, case
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date
@@ -264,7 +264,7 @@ def admin_login():
 @admin_required
 def admin_panel():
     requests = AccessControl.query.join(User).order_by(
-        db.case(
+        case(
             (AccessControl.status == 'pending', 0),
             (AccessControl.status == 'approved', 1),
             else_=2
