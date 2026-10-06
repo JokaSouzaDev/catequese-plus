@@ -1,3 +1,93 @@
 {% extends 'base.html' %}
-{% block title %}Cadastro • Catequese+{% endblock %}
-{% block content %}<section class="auth-card"><h1>Criar conta</h1><p>Cadastro exclusivo para catequistas.</p><form method="post"><label>Seu nome<input name="name" required></label><label>E-mail<input name="email" type="email" required></label><label>Senha<input name="password" type="password" minlength="6" required></label><button class="btn" type="submit">Criar conta</button></form><p class="muted">Já tem conta? <a href="{{ url_for('login') }}">Entrar</a></p></section>{% endblock %}
+{% block title %}Solicitar acesso • Catequese+{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <span class="eyebrow">Acesso controlado</span>
+  <h1>Solicitar acesso</h1>
+  <p>Crie seu cadastro. O acesso ao Catequese+ só será liberado depois da aprovação do administrador.</p>
+
+  <form method="post" id="registerForm">
+    <label>Seu nome
+      <input name="name" required autocomplete="name">
+    </label>
+    <label>E-mail
+      <input name="email" type="email" required autocomplete="email">
+    </label>
+    <label>Senha
+      <input name="password" type="password" minlength="6" required autocomplete="new-password">
+    </label>
+
+    <input type="hidden" name="geo_lat" id="geo_lat">
+    <input type="hidden" name="geo_lon" id="geo_lon">
+    <input type="hidden" name="geo_accuracy" id="geo_accuracy">
+    <input type="hidden" name="device_info" id="device_info">
+
+    <div class="consent-box">
+      <label class="consent-check">
+        <input type="checkbox" name="consent_tracking" id="consent_tracking" required>
+        <span>
+          Autorizo o Catequese+ a registrar meu endereço IP, informações técnicas do navegador/dispositivo
+          e localização aproximada por IP. Se eu permitir no navegador, autorizo também o registro das
+          coordenadas do dispositivo para análise do administrador responsável pelo acesso.
+        </span>
+      </label>
+      <p class="privacy-note">
+        Essas informações são usadas apenas para análise e controle de acesso. A localização do navegador
+        depende da sua permissão e pode ser recusada.
+      </p>
+      <div id="locationStatus" class="location-status">Localização do navegador ainda não solicitada.</div>
+    </div>
+
+    <button class="btn" type="submit">Enviar solicitação</button>
+  </form>
+
+  <p class="muted">Já tem conta aprovada? <a href="{{ url_for('login') }}">Entrar</a></p>
+</section>
+
+<script>
+(function () {
+  const checkbox = document.getElementById('consent_tracking');
+  const status = document.getElementById('locationStatus');
+  const deviceField = document.getElementById('device_info');
+
+  const device = {
+    userAgent: navigator.userAgent || '',
+    platform: navigator.platform || '',
+    language: navigator.language || '',
+    screen: window.screen ? (window.screen.width + 'x' + window.screen.height) : '',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+    touchPoints: navigator.maxTouchPoints || 0
+  };
+  deviceField.value = JSON.stringify(device);
+
+  checkbox.addEventListener('change', function () {
+    if (!checkbox.checked) {
+      document.getElementById('geo_lat').value = '';
+      document.getElementById('geo_lon').value = '';
+      document.getElementById('geo_accuracy').value = '';
+      status.textContent = 'Autorização desmarcada.';
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      status.textContent = 'Este navegador não oferece geolocalização. A localização aproximada por IP ainda poderá ser registrada.';
+      return;
+    }
+
+    status.textContent = 'Solicitando permissão de localização ao navegador...';
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        document.getElementById('geo_lat').value = String(position.coords.latitude);
+        document.getElementById('geo_lon').value = String(position.coords.longitude);
+        document.getElementById('geo_accuracy').value = String(Math.round(position.coords.accuracy));
+        status.textContent = 'Localização autorizada e pronta para acompanhar a solicitação.';
+      },
+      function () {
+        status.textContent = 'Localização precisa não autorizada. A solicitação poderá usar apenas a localização aproximada por IP.';
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
+    );
+  });
+})();
+</script>
+{% endblock %}
