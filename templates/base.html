@@ -9,7 +9,9 @@
 <body>
   <header class="topbar">
     <a class="brand" href="{{ url_for('index') }}">Catequese<span>+</span></a>
-    {% if current_user.is_authenticated %}
+    {% if session.get('admin_authenticated') %}
+      <nav><a href="{{ url_for('admin_panel') }}">ADM</a><a href="{{ url_for('admin_logout') }}">Sair</a></nav>
+    {% elif current_user.is_authenticated %}
       <nav><a href="{{ url_for('dashboard') }}">Salas</a><a href="{{ url_for('logout') }}">Sair</a></nav>
     {% endif %}
   </header>
